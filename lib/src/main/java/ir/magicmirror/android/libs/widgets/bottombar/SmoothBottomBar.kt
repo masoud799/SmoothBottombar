@@ -366,8 +366,12 @@ class SmoothBottomBar @JvmOverloads constructor(
 
         var lastX = barSideMargins
 
-        activeItemWidth = (width - (barSideMargins * 2)) / 2
-        itemWidth = activeItemWidth / items.size.minus(1)
+//        activeItemWidth = (width - (barSideMargins * 2)) / 2
+//        itemWidth = activeItemWidth / items.size.minus(1)
+        val selectedTextLength = paintText.measureText(items[itemActiveIndex].title)
+        activeItemWidth =
+            selectedTextLength + itemIconSizeActive + itemIconMargin + (itemPadding * 2)
+        itemWidth = (width - activeItemWidth - (barSideMargins * 2)) / items.size.minus(1)
 
         for ((index, item) in items.withIndex()) {
             if (index == itemActiveIndex) {
@@ -502,11 +506,13 @@ class SmoothBottomBar @JvmOverloads constructor(
         if (items.isNotEmpty()) {
             for ((index, item) in items.withIndex()) {
                 if (index == itemActiveIndex) {
-                    animateAlpha(item,
+                    animateAlpha(
+                        item,
                         OPAQUE
                     )
                 } else {
-                    animateAlpha(item,
+                    animateAlpha(
+                        item,
                         TRANSPARENT
                     )
                 }

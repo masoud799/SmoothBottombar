@@ -29,10 +29,10 @@
         app:indicatorColor="#E30619"
         app:indicatorRadius="2dp"
         app:itemFontFamily="@font/iran_sans_regular"
-        app:itemPadding="10dp"
+        app:itemPadding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/menu_bottom"
-        app:sideMargins="16dp"
+        app:sideMargins="24dp"
         app:textColor="@color/colorTextPrimary"
         app:textSize="12sp" />
 
