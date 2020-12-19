@@ -1,4 +1,4 @@
-package ir.magicmirror.android.libs.widgets.bottombar
+package ir.magicmirror.android.libs.widgets
 
 import android.graphics.RectF
 import android.graphics.drawable.Drawable

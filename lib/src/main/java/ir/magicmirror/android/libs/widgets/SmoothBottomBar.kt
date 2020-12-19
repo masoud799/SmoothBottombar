@@ -1,4 +1,4 @@
-package ir.magicmirror.android.libs.widgets.bottombar
+package ir.magicmirror.android.libs.widgets
 
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
@@ -21,7 +21,6 @@ import androidx.annotation.XmlRes
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.navigation.NavController
-import me.ibrahimsn.lib.R
 import kotlin.math.abs
 import kotlin.math.roundToInt
 

@@ -1,4 +1,4 @@
-package ir.magicmirror.android.libs.widgets.bottombar
+package ir.magicmirror.android.libs.widgets
 
 import android.os.Bundle
 import android.view.Menu

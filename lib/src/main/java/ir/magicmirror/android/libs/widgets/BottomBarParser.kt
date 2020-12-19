@@ -1,4 +1,4 @@
-package ir.magicmirror.android.libs.widgets.bottombar
+package ir.magicmirror.android.libs.widgets
 
 import android.content.Context
 import android.content.res.Resources
