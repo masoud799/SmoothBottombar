@@ -224,7 +224,7 @@ class SmoothBottomBar @JvmOverloads constructor(
         get() = _itemActiveIndex
         set(value) {
             _itemActiveIndex = value
-            applyItemActiveIndex()
+//            applyItemActiveIndex()
         }
 
     // Listeners
