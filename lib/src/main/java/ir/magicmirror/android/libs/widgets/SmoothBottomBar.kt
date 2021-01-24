@@ -62,7 +62,7 @@ class SmoothBottomBar @JvmOverloads constructor(
     private var _itemPadding = context.d2p(DEFAULT_ITEM_PADDING)
 
     private var _itemAnimDuration =
-        DEFAULT_ANIM_DURATION
+        1L
 
     @Dimension
     private var _itemIconSize = context.d2p(DEFAULT_ICON_SIZE)
@@ -224,7 +224,7 @@ class SmoothBottomBar @JvmOverloads constructor(
         get() = _itemActiveIndex
         set(value) {
             _itemActiveIndex = value
-//            applyItemActiveIndex()
+            applyItemActiveIndex()
         }
 
     // Listeners
@@ -499,6 +499,7 @@ class SmoothBottomBar @JvmOverloads constructor(
                 }
             }
         }
+        itemAnimDuration = DEFAULT_ANIM_DURATION
         onSizeChanged()
         return true
     }
