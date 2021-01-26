@@ -39,6 +39,7 @@ class SmoothBottomBar @JvmOverloads constructor(
     private val rect = RectF()
 
     private var firstTime: Boolean = true
+    private var applyAnimation: Boolean = false
 
     private var items = listOf<BottomBarItem>()
 
@@ -523,33 +524,32 @@ class SmoothBottomBar @JvmOverloads constructor(
                 }
             }
 
-//            if (firstTime) {
-//                indicatorLocation = items[itemActiveIndex].rect.left
-//                currentIconTint = itemIconTintActive
-//                invalidate()
-//                firstTime = false
-//            } else
-//            {
-            ValueAnimator.ofFloat(
-                indicatorLocation,
-                items[itemActiveIndex].rect.left
-            ).apply {
-                duration = itemAnimDuration
-                interpolator = DecelerateInterpolator()
-                addUpdateListener { animation ->
-                    indicatorLocation = animation.animatedValue as Float
+            if (!applyAnimation) {
+                indicatorLocation = items[itemActiveIndex].rect.left
+                currentIconTint = itemIconTintActive
+                invalidate()
+                applyAnimation = true
+            } else {
+                ValueAnimator.ofFloat(
+                    indicatorLocation,
+                    items[itemActiveIndex].rect.left
+                ).apply {
+                    duration = itemAnimDuration
+                    interpolator = DecelerateInterpolator()
+                    addUpdateListener { animation ->
+                        indicatorLocation = animation.animatedValue as Float
+                    }
+                    start()
                 }
-                start()
-            }
 
-            ValueAnimator.ofObject(ArgbEvaluator(), itemIconTint, itemIconTintActive).apply {
-                duration = itemAnimDuration
-                addUpdateListener {
-                    currentIconTint = it.animatedValue as Int
+                ValueAnimator.ofObject(ArgbEvaluator(), itemIconTint, itemIconTintActive).apply {
+                    duration = itemAnimDuration
+                    addUpdateListener {
+                        currentIconTint = it.animatedValue as Int
+                    }
+                    start()
                 }
-                start()
             }
-//            }
         }
     }
 
