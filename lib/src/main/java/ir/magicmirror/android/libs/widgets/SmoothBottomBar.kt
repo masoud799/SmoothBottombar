@@ -93,7 +93,7 @@ class SmoothBottomBar @JvmOverloads constructor(
     private var _itemMenuRes: Int =
         INVALID_RES
 
-    private var _itemActiveIndex: Int = 4
+    private var _itemActiveIndex: Int = 0
 
     // Core Attributes
     var barBackgroundColor: Int
@@ -390,80 +390,83 @@ class SmoothBottomBar @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        if (!firstTime) {
+            // Draw background
+            if (barCornerRadius > 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                canvas.drawRoundRect(
+                    0f, 0f,
+                    width.toFloat(),
+                    height.toFloat(),
+                    barCornerRadius,
+                    barCornerRadius,
+                    paintBackground
+                )
+            } else {
+                canvas.drawRect(
+                    0f, 0f,
+                    width.toFloat(),
+                    height.toFloat(),
+                    paintBackground
+                )
+            }
 
-        // Draw background
-        if (barCornerRadius > 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // Draw indicator
+            rect.left = indicatorLocation
+            rect.top = items[itemActiveIndex].rect.centerY() - itemIconSize / 2 - itemPadding / 2
+            rect.right = indicatorLocation + activeItemWidth
+            rect.bottom = items[itemActiveIndex].rect.centerY() + itemIconSize / 2 + itemPadding / 2
+
             canvas.drawRoundRect(
-                0f, 0f,
-                width.toFloat(),
-                height.toFloat(),
-                barCornerRadius,
-                barCornerRadius,
-                paintBackground
+                rect,
+                barIndicatorRadius,
+                barIndicatorRadius,
+                paintIndicator
             )
+
+            val textHeight = (paintText.descent() + paintText.ascent()) / 2
+
+            for ((index, item) in items.withIndex()) {
+                val textLength = paintText.measureText(item.title)
+                item.icon.mutate()
+                if (index == itemActiveIndex) {
+                    item.icon.setBounds(
+                        item.rect.centerX()
+                            .toInt() - itemIconSizeActive.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 - itemIconSizeActive.toInt() / 2,
+                        item.rect.centerX()
+                            .toInt() + itemIconSizeActive.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 + itemIconSizeActive.toInt() / 2
+                    )
+                } else {
+                    item.icon.setBounds(
+                        item.rect.centerX()
+                            .toInt() - itemIconSize.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 - itemIconSize.toInt() / 2,
+                        item.rect.centerX()
+                            .toInt() + itemIconSize.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 + itemIconSize.toInt() / 2
+                    )
+                }
+
+                tintAndDrawIcon(item, index, canvas)
+
+                paintText.alpha = item.alpha
+                if (index == itemActiveIndex) {
+                    canvas.drawText(
+                        item.title,
+                        item.rect.centerX() - (itemIconSizeActive / 2 + itemIconMargin),
+                        item.rect.centerY() - textHeight, paintText
+                    )
+                } else {
+                    canvas.drawText(
+                        item.title,
+                        item.rect.centerX() - (itemIconSize / 2 + itemIconMargin),
+                        item.rect.centerY() - textHeight, paintText
+                    )
+                }
+            }
         } else {
-            canvas.drawRect(
-                0f, 0f,
-                width.toFloat(),
-                height.toFloat(),
-                paintBackground
-            )
-        }
-
-        // Draw indicator
-        rect.left = indicatorLocation
-        rect.top = items[itemActiveIndex].rect.centerY() - itemIconSize / 2 - itemPadding / 2
-        rect.right = indicatorLocation + activeItemWidth
-        rect.bottom = items[itemActiveIndex].rect.centerY() + itemIconSize / 2 + itemPadding / 2
-
-        canvas.drawRoundRect(
-            rect,
-            barIndicatorRadius,
-            barIndicatorRadius,
-            paintIndicator
-        )
-
-        val textHeight = (paintText.descent() + paintText.ascent()) / 2
-
-        for ((index, item) in items.withIndex()) {
-            val textLength = paintText.measureText(item.title)
-            item.icon.mutate()
-            if (index == itemActiveIndex) {
-                item.icon.setBounds(
-                    item.rect.centerX()
-                        .toInt() - itemIconSizeActive.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
-                    height / 2 - itemIconSizeActive.toInt() / 2,
-                    item.rect.centerX()
-                        .toInt() + itemIconSizeActive.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
-                    height / 2 + itemIconSizeActive.toInt() / 2
-                )
-            } else {
-                item.icon.setBounds(
-                    item.rect.centerX()
-                        .toInt() - itemIconSize.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
-                    height / 2 - itemIconSize.toInt() / 2,
-                    item.rect.centerX()
-                        .toInt() + itemIconSize.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
-                    height / 2 + itemIconSize.toInt() / 2
-                )
-            }
-
-            tintAndDrawIcon(item, index, canvas)
-
-            paintText.alpha = item.alpha
-            if (index == itemActiveIndex) {
-                canvas.drawText(
-                    item.title,
-                    item.rect.centerX() - (itemIconSizeActive / 2 + itemIconMargin),
-                    item.rect.centerY() - textHeight, paintText
-                )
-            } else {
-                canvas.drawText(
-                    item.title,
-                    item.rect.centerX() - (itemIconSize / 2 + itemIconMargin),
-                    item.rect.centerY() - textHeight, paintText
-                )
-            }
+            firstTime = false
         }
     }
 
@@ -520,32 +523,33 @@ class SmoothBottomBar @JvmOverloads constructor(
                 }
             }
 
-            if (firstTime) {
-                indicatorLocation = items[itemActiveIndex].rect.left
-                currentIconTint = itemIconTintActive
-                invalidate()
-                firstTime = false
-            } else {
-                ValueAnimator.ofFloat(
-                    indicatorLocation,
-                    items[itemActiveIndex].rect.left
-                ).apply {
-                    duration = itemAnimDuration
-                    interpolator = DecelerateInterpolator()
-                    addUpdateListener { animation ->
-                        indicatorLocation = animation.animatedValue as Float
-                    }
-                    start()
+//            if (firstTime) {
+//                indicatorLocation = items[itemActiveIndex].rect.left
+//                currentIconTint = itemIconTintActive
+//                invalidate()
+//                firstTime = false
+//            } else
+//            {
+            ValueAnimator.ofFloat(
+                indicatorLocation,
+                items[itemActiveIndex].rect.left
+            ).apply {
+                duration = itemAnimDuration
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { animation ->
+                    indicatorLocation = animation.animatedValue as Float
                 }
-
-                ValueAnimator.ofObject(ArgbEvaluator(), itemIconTint, itemIconTintActive).apply {
-                    duration = itemAnimDuration
-                    addUpdateListener {
-                        currentIconTint = it.animatedValue as Int
-                    }
-                    start()
-                }
+                start()
             }
+
+            ValueAnimator.ofObject(ArgbEvaluator(), itemIconTint, itemIconTintActive).apply {
+                duration = itemAnimDuration
+                addUpdateListener {
+                    currentIconTint = it.animatedValue as Int
+                }
+                start()
+            }
+//            }
         }
     }
 
