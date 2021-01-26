@@ -40,6 +40,7 @@ class SmoothBottomBar @JvmOverloads constructor(
 
     private var firstTime: Boolean = true
     private var applyAnimation: Boolean = false
+    private var applyFirstAnimation: Boolean = true
 
     private var items = listOf<BottomBarItem>()
 
@@ -530,24 +531,29 @@ class SmoothBottomBar @JvmOverloads constructor(
                 invalidate()
                 applyAnimation = true
             } else {
-                ValueAnimator.ofFloat(
-                    indicatorLocation,
-                    items[itemActiveIndex].rect.left
-                ).apply {
-                    duration = itemAnimDuration
-                    interpolator = DecelerateInterpolator()
-                    addUpdateListener { animation ->
-                        indicatorLocation = animation.animatedValue as Float
+                if (!applyFirstAnimation) {
+                    ValueAnimator.ofFloat(
+                        indicatorLocation,
+                        items[itemActiveIndex].rect.left
+                    ).apply {
+                        duration = itemAnimDuration
+                        interpolator = DecelerateInterpolator()
+                        addUpdateListener { animation ->
+                            indicatorLocation = animation.animatedValue as Float
+                        }
+                        start()
                     }
-                    start()
-                }
 
-                ValueAnimator.ofObject(ArgbEvaluator(), itemIconTint, itemIconTintActive).apply {
-                    duration = itemAnimDuration
-                    addUpdateListener {
-                        currentIconTint = it.animatedValue as Int
-                    }
-                    start()
+                    ValueAnimator.ofObject(ArgbEvaluator(), itemIconTint, itemIconTintActive)
+                        .apply {
+                            duration = itemAnimDuration
+                            addUpdateListener {
+                                currentIconTint = it.animatedValue as Int
+                            }
+                            start()
+                        }
+                } else {
+                    applyFirstAnimation = false
                 }
             }
         }
