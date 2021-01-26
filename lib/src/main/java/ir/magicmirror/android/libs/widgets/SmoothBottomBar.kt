@@ -93,7 +93,7 @@ class SmoothBottomBar @JvmOverloads constructor(
     private var _itemMenuRes: Int =
         INVALID_RES
 
-    private var _itemActiveIndex: Int = 0
+    private var _itemActiveIndex: Int = 4
 
     // Core Attributes
     var barBackgroundColor: Int
