@@ -1,20 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
-        android:id="@+id/first_fragment"
-        android:icon="@drawable/ic_action_profile"
-        android:title="@string/menu_profile" />
-
-    <item
-        android:id="@+id/second_fragment"
-        android:icon="@drawable/ic_action_categories"
-        android:title="@string/menu_categories" />
-
-    <item
-        android:id="@+id/third_fragment"
-        android:icon="@drawable/ic_action_live"
-        android:title="@string/menu_live" />
+        android:id="@+id/fifth_fragment"
+        android:icon="@drawable/ic_action_home"
+        android:title="@string/menu_home" />
 
     <item
         android:id="@+id/fourth_fragment"
@@ -22,8 +11,17 @@
         android:title="@string/menu_search" />
 
     <item
-        android:id="@+id/fifth_fragment"
-        android:icon="@drawable/ic_action_home"
-        android:title="@string/menu_home" />
+        android:id="@+id/third_fragment"
+        android:icon="@drawable/ic_action_live"
+        android:title="@string/menu_live" />
 
+    <item
+        android:id="@+id/second_fragment"
+        android:icon="@drawable/ic_action_categories"
+        android:title="@string/menu_categories" />
+
+    <item
+        android:id="@+id/first_fragment"
+        android:icon="@drawable/ic_action_profile"
+        android:title="@string/menu_profile" />
 </menu>

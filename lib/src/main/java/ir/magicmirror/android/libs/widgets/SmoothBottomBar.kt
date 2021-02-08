@@ -10,7 +10,9 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.DecelerateInterpolator
@@ -20,6 +22,8 @@ import androidx.annotation.FontRes
 import androidx.annotation.XmlRes
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.get
+import androidx.core.view.iterator
 import androidx.navigation.NavController
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -37,6 +41,8 @@ class SmoothBottomBar @JvmOverloads constructor(
     private var currentIconTint = itemIconTintActive
     private var indicatorLocation = barSideMargins
     private val rect = RectF()
+
+    private var firstTime: Boolean = true
 
     private var items = listOf<BottomBarItem>()
 
@@ -364,9 +370,19 @@ class SmoothBottomBar @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
 
         var lastX = barSideMargins
+        // reverse items layout order if layout direction is RTL
+        if (firstTime) {
+            items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
+                && layoutDirection == LAYOUT_DIRECTION_RTL
+            ) {
+                itemActiveIndex = items.size.minus(1).minus(itemActiveIndex)
+                items.reversed()
+            } else {
+                items
+            }
+            firstTime = false
+        }
 
-//        activeItemWidth = (width - (barSideMargins * 2)) / 2
-//        itemWidth = activeItemWidth / items.size.minus(1)
         val selectedTextLength = paintText.measureText(items[itemActiveIndex].title)
         activeItemWidth =
             selectedTextLength + itemIconSizeActive + itemIconMargin + (itemPadding * 2)
@@ -408,10 +424,19 @@ class SmoothBottomBar @JvmOverloads constructor(
         }
 
         // Draw indicator
-        rect.left = indicatorLocation
-        rect.top = items[itemActiveIndex].rect.centerY() - itemIconSize / 2 - itemPadding / 2
-        rect.right = indicatorLocation + activeItemWidth
-        rect.bottom = items[itemActiveIndex].rect.centerY() + itemIconSize / 2 + itemPadding / 2
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
+            && layoutDirection == LAYOUT_DIRECTION_RTL
+        ) {
+            rect.left = indicatorLocation
+            rect.top = items[itemActiveIndex].rect.centerY() - itemIconSize / 2 - itemPadding / 2
+            rect.right = indicatorLocation + activeItemWidth
+            rect.bottom = items[itemActiveIndex].rect.centerY() + itemIconSize / 2 + itemPadding / 2
+        } else {
+            rect.right = indicatorLocation
+            rect.top = items[itemActiveIndex].rect.centerY() - itemIconSize / 2 - itemPadding / 2
+            rect.left = indicatorLocation + activeItemWidth
+            rect.bottom = items[itemActiveIndex].rect.centerY() + itemIconSize / 2 + itemPadding / 2
+        }
 
         canvas.drawRoundRect(
             rect,
@@ -422,44 +447,89 @@ class SmoothBottomBar @JvmOverloads constructor(
 
         val textHeight = (paintText.descent() + paintText.ascent()) / 2
 
-        for ((index, item) in items.withIndex()) {
-            val textLength = paintText.measureText(item.title)
-            item.icon.mutate()
-            if (index == itemActiveIndex) {
-                item.icon.setBounds(
-                    item.rect.centerX()
-                        .toInt() - itemIconSizeActive.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
-                    height / 2 - itemIconSizeActive.toInt() / 2,
-                    item.rect.centerX()
-                        .toInt() + itemIconSizeActive.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
-                    height / 2 + itemIconSizeActive.toInt() / 2
-                )
-            } else {
-                item.icon.setBounds(
-                    item.rect.centerX()
-                        .toInt() - itemIconSize.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
-                    height / 2 - itemIconSize.toInt() / 2,
-                    item.rect.centerX()
-                        .toInt() + itemIconSize.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
-                    height / 2 + itemIconSize.toInt() / 2
-                )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
+            && layoutDirection == LAYOUT_DIRECTION_RTL
+        ) {
+            for ((index, item) in items.withIndex()) {
+                val textLength = paintText.measureText(item.title)
+                item.icon.mutate()
+                if (index == itemActiveIndex) {
+                    item.icon.setBounds(
+                        item.rect.centerX()
+                            .toInt() - itemIconSizeActive.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 - itemIconSizeActive.toInt() / 2,
+                        item.rect.centerX()
+                            .toInt() + itemIconSizeActive.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 + itemIconSizeActive.toInt() / 2
+                    )
+                } else {
+                    item.icon.setBounds(
+                        item.rect.centerX()
+                            .toInt() - itemIconSize.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 - itemIconSize.toInt() / 2,
+                        item.rect.centerX()
+                            .toInt() + itemIconSize.toInt() / 2 + ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 + itemIconSize.toInt() / 2
+                    )
+                }
+
+                tintAndDrawIcon(item, index, canvas)
+
+                paintText.alpha = item.alpha
+                if (index == itemActiveIndex) {
+                    canvas.drawText(
+                        item.title,
+                        item.rect.centerX() - (itemIconSizeActive / 2 + itemIconMargin),
+                        item.rect.centerY() - textHeight, paintText
+                    )
+                } else {
+                    canvas.drawText(
+                        item.title,
+                        item.rect.centerX() - (itemIconSize / 2 + itemIconMargin),
+                        item.rect.centerY() - textHeight, paintText
+                    )
+                }
             }
+        } else {
+            for ((index, item) in items.withIndex()) {
+                val textLength = paintText.measureText(item.title)
+                item.icon.mutate()
+                if (index == itemActiveIndex) {
+                    item.icon.setBounds(
+                        item.rect.centerX()
+                            .toInt() - itemIconSizeActive.toInt() / 2 - ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 - itemIconSizeActive.toInt() / 2,
+                        item.rect.centerX()
+                            .toInt() + itemIconSizeActive.toInt() / 2 - ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 + itemIconSizeActive.toInt() / 2
+                    )
+                } else {
+                    item.icon.setBounds(
+                        item.rect.centerX()
+                            .toInt() - itemIconSize.toInt() / 2 - ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 - itemIconSize.toInt() / 2,
+                        item.rect.centerX()
+                            .toInt() + itemIconSize.toInt() / 2 - ((textLength / 2) * (1 - (OPAQUE - item.alpha) / OPAQUE.toFloat())).toInt(),
+                        height / 2 + itemIconSize.toInt() / 2
+                    )
+                }
 
-            tintAndDrawIcon(item, index, canvas)
+                tintAndDrawIcon(item, index, canvas)
 
-            paintText.alpha = item.alpha
-            if (index == itemActiveIndex) {
-                canvas.drawText(
-                    item.title,
-                    item.rect.centerX() - (itemIconSizeActive / 2 + itemIconMargin),
-                    item.rect.centerY() - textHeight, paintText
-                )
-            } else {
-                canvas.drawText(
-                    item.title,
-                    item.rect.centerX() - (itemIconSize / 2 + itemIconMargin),
-                    item.rect.centerY() - textHeight, paintText
-                )
+                paintText.alpha = item.alpha
+                if (index == itemActiveIndex) {
+                    canvas.drawText(
+                        item.title,
+                        item.rect.centerX() + (itemIconSizeActive / 2 + itemIconMargin),
+                        item.rect.centerY() - textHeight, paintText
+                    )
+                } else {
+                    canvas.drawText(
+                        item.title,
+                        item.rect.centerX() + (itemIconSize / 2 + itemIconMargin),
+                        item.rect.centerY() - textHeight, paintText
+                    )
+                }
             }
         }
     }
@@ -553,6 +623,24 @@ class SmoothBottomBar @JvmOverloads constructor(
     }
 
     fun setupWithNavController(menu: Menu, navController: NavController) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
+            && layoutDirection == LAYOUT_DIRECTION_RTL
+        ) {
+            val menuItems = arrayListOf<MenuItem>()
+            for (item in menu) {
+                menuItems.add(item)
+                menu.removeItem(item.itemId)
+            }
+
+            for (index in menuItems.size.minus(1) downTo 0) {
+                menu.add(
+                    menuItems[index].groupId,
+                    menuItems[index].itemId,
+                    menuItems[index].order,
+                    menuItems[index].title
+                )
+            }
+        }
         NavigationComponentHelper.setupWithNavController(
             menu,
             this,

@@ -33,7 +33,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/menu_bottom"
         app:sideMargins="24dp"
-        app:activeItem="4"
         app:textColor="@color/colorTextPrimary"
         app:textSize="12sp" />
 
