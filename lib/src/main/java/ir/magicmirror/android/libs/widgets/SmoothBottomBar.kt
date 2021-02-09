@@ -623,30 +623,33 @@ class SmoothBottomBar @JvmOverloads constructor(
     }
 
     fun setupWithNavController(menu: Menu, navController: NavController) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
-            && layoutDirection == LAYOUT_DIRECTION_RTL
-        ) {
-            val menuItems = arrayListOf<MenuItem>()
-            for (item in menu) {
-                menuItems.add(item)
+        post{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
+                && layoutDirection == LAYOUT_DIRECTION_RTL
+            ) {
+                val menuItems = arrayListOf<MenuItem>()
+                for (item in menu) {
+                    menuItems.add(item)
+                }
+                for (index in menuItems.size.minus(1) downTo 0) {
+                    menu.removeItem(menuItems[index].itemId)
+                }
+                for (index in menuItems.size.minus(1) downTo 0) {
+                    menu.add(
+                        menuItems[index].groupId,
+                        menuItems[index].itemId,
+                        menuItems[index].order,
+                        menuItems[index].title
+                    )
+                }
             }
-            for (index in menuItems.size.minus(1) downTo 0) {
-                menu.removeItem(menuItems[index].itemId)
-            }
-            for (index in menuItems.size.minus(1) downTo 0) {
-                menu.add(
-                    menuItems[index].groupId,
-                    menuItems[index].itemId,
-                    menuItems[index].order,
-                    menuItems[index].title
-                )
-            }
+            NavigationComponentHelper.setupWithNavController(
+                menu,
+                this,
+                navController
+            )
         }
-        NavigationComponentHelper.setupWithNavController(
-            menu,
-            this,
-            navController
-        )
+
     }
 
     /**
