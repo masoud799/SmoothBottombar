@@ -432,7 +432,7 @@ class SmoothBottomBar @JvmOverloads constructor(
             rect.right = indicatorLocation + activeItemWidth
             rect.bottom = items[itemActiveIndex].rect.centerY() + itemIconSize / 2 + itemPadding / 2
         } else {
-            rect.right = indicatorLocation
+            rect.right = indicatorLocation + itemPadding / 2
             rect.top = items[itemActiveIndex].rect.centerY() - itemIconSize / 2 - itemPadding / 2
             rect.left = indicatorLocation + activeItemWidth
             rect.bottom = items[itemActiveIndex].rect.centerY() + itemIconSize / 2 + itemPadding / 2
@@ -623,33 +623,30 @@ class SmoothBottomBar @JvmOverloads constructor(
     }
 
     fun setupWithNavController(menu: Menu, navController: NavController) {
-        post{
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
-                && layoutDirection == LAYOUT_DIRECTION_RTL
-            ) {
-                val menuItems = arrayListOf<MenuItem>()
-                for (item in menu) {
-                    menuItems.add(item)
-                }
-                for (index in menuItems.size.minus(1) downTo 0) {
-                    menu.removeItem(menuItems[index].itemId)
-                }
-                for (index in menuItems.size.minus(1) downTo 0) {
-                    menu.add(
-                        menuItems[index].groupId,
-                        menuItems[index].itemId,
-                        menuItems[index].order,
-                        menuItems[index].title
-                    )
-                }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
+            && layoutDirection == LAYOUT_DIRECTION_RTL
+        ) {
+            val menuItems = arrayListOf<MenuItem>()
+            for (item in menu) {
+                menuItems.add(item)
             }
-            NavigationComponentHelper.setupWithNavController(
-                menu,
-                this,
-                navController
-            )
+            for (index in menuItems.size.minus(1) downTo 0) {
+                menu.removeItem(menuItems[index].itemId)
+            }
+            for (index in menuItems.size.minus(1) downTo 0) {
+                menu.add(
+                    menuItems[index].groupId,
+                    menuItems[index].itemId,
+                    menuItems[index].order,
+                    menuItems[index].title
+                )
+            }
         }
-
+        NavigationComponentHelper.setupWithNavController(
+            menu,
+            this,
+            navController
+        )
     }
 
     /**
