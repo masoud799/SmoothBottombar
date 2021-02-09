@@ -629,9 +629,10 @@ class SmoothBottomBar @JvmOverloads constructor(
             val menuItems = arrayListOf<MenuItem>()
             for (item in menu) {
                 menuItems.add(item)
-                menu.removeItem(item.itemId)
             }
-
+            for (index in menuItems.size.minus(1) downTo 0) {
+                menu.removeItem(menuItems[index].itemId)
+            }
             for (index in menuItems.size.minus(1) downTo 0) {
                 menu.add(
                     menuItems[index].groupId,
